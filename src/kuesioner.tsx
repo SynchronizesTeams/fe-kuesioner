@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL
 
 const PekanItKuesioner: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +12,8 @@ const PekanItKuesioner: React.FC = () => {
   const [tampilanStand, setTampilanStand] = useState("");
   const [penjelasanProduk, setPenjelasanProduk] = useState("");
   const [hiburan, setHiburan] = useState("");
+  const [kritikSaran, setKritikSaran] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const options = ["Baik", "Cukup", "Kurang", "Buruk"] as const;
   type Option = typeof options[number];
@@ -19,7 +24,75 @@ const PekanItKuesioner: React.FC = () => {
     Buruk: "peer-checked:bg-red-400",
   };
 
-  const [loading] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("userToken");
+    const userId = localStorage.getItem("userId");
+    if (!token || !userId) {
+      navigate("/");
+    } else {
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const token = localStorage.getItem("userToken");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const formData = {
+      nama_wali_siswa: namaWaliSiswa,
+      tampilan_produk: tampilanProduk,
+      tampilan_stand: tampilanStand,
+      penjelasan_produk: penjelasanProduk,
+      hiburan,
+      kritik_saran: kritikSaran,
+    };
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/kuesioner/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Gagal mengirim data");
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Terima kasih telah mengisi kuesioner! Anda akan dialihkan untuk mendapat nomor antrian.',
+        showConfirmButton: false,
+        timer: 2000
+      }).then(() => {
+        navigate("/antrian");
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Terjadi kesalahan saat mengirim data.',
+      }).then(() => {
+        navigate("/antrian");
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -28,120 +101,127 @@ const PekanItKuesioner: React.FC = () => {
         id="loading"
         className="w-screen h-screen flex justify-center items-center"
       >
-        {/* Spinner omitted for brevity */}
         Loading...
       </div>
     );
   }
 
   return (
-    <main
-      id="main"
-      className="min-h-screen min-w-screen bg-gradient-to-br from-slate-50 to-gray-50 p-6 sm:p-10 space-y-8"
+
+  <main className="min-h-screen min-w-screen bg-gradient-to-br from-rose-50 to-rose-100 p-6 sm:p-10">
+    <form
+      id="dataForm"
+      onSubmit={handleSubmit}
+      className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200"
     >
-      <form
-        id="dataForm"
-        method="POST"
-        encType="application/json"
-        onSubmit={(e) => {
-          e.preventDefault();
-          alert("Data berhasil dikirim");
-          navigate("/antrian");
-        }}
-        className="max-w-4xl mx-auto bg-gradient-to-br from-slate-50 to-gray-50 rounded-2xl shadow-xl overflow-hidden"
-      >
-        {/* Header Form */}
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-700">
-            Kuesioner Penilaian
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">Isi dengan jujur ya!</p>
-        </div>
+      {/* Header */}
+      <div className="p-6 bg-gradient-to-r from-rose-600 to-pink-500 border-b border-gray-200">
+        <h1 className="text-xl font-bold text-white">📝 Kuesioner PekanIT</h1>
+        <p className="text-xs text-pink-100 mt-1">Silakan isi dengan jujur ya!</p>
+      </div>
 
-        {/* Nama Wali Siswa */}
-        <div className="p-6">
-          <label
-            htmlFor="nama_wali_siswa"
-            className="block text-lg font-semibold text-gray-700"
-          >
-            Nama Wali Siswa
+      {/* Nama Wali Siswa */}
+      <div className="p-6 space-y-2">
+        <label
+          htmlFor="nama_wali_siswa"
+          className="block text-lg font-semibold text-gray-700"
+        >
+          Nama Wali Siswa <span className="text-rose-600">*</span>
+        </label>
+        <input
+          type="text"
+          id="nama_wali_siswa"
+          value={namaWaliSiswa}
+          onChange={(e) => setNamaWaliSiswa(e.target.value)}
+          className="text-base text-gray-800 block w-full rounded-md shadow-sm p-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-400"
+          placeholder="Masukkan nama Anda"
+          required
+        />
+      </div>
+
+      {/* Penilaian */}
+      {[
+        {
+          name: "tampilan_produk",
+          label: "🎨 Tampilan Produk",
+          value: tampilanProduk,
+          setter: setTampilanProduk,
+        },
+        {
+          name: "tampilan_stand",
+          label: "🏕️ Tampilan Stand",
+          value: tampilanStand,
+          setter: setTampilanStand,
+        },
+        {
+          name: "penjelasan_produk",
+          label: "🗣️ Penjelasan Produk",
+          value: penjelasanProduk,
+          setter: setPenjelasanProduk,
+        },
+        {
+          name: "hiburan",
+          label: "🎉 Hiburan",
+          value: hiburan,
+          setter: setHiburan,
+        },
+      ].map(({ name, label, value, setter }) => (
+        <div className="px-6 py-4" key={name}>
+          <label className="block text-base font-semibold text-gray-700 mb-2">
+            {label}
           </label>
-          <input
-            type="text"
-            id="nama_wali_siswa"
-            name="nama_wali_siswa"
-            value={namaWaliSiswa}
-            onChange={(e) => setNamaWaliSiswa(e.target.value)}
-            className="mt-1 text-lg text-black block w-full rounded-md shadow-sm p-2 outline-none transition-all duration-100 focus:ring-2 focus:ring-rose-400 border border-gray-300"
-            required
-          />
-        </div>
-
-        {/* Pertanyaan dengan radio options */}
-        {[
-          {
-            name: "tampilan_produk",
-            label: "Tampilan Produk",
-            value: tampilanProduk,
-            setter: setTampilanProduk,
-          },
-          {
-            name: "tampilan_stand",
-            label: "Tampilan Stand",
-            value: tampilanStand,
-            setter: setTampilanStand,
-          },
-          {
-            name: "penjelasan_produk",
-            label: "Penjelasan Produk",
-            value: penjelasanProduk,
-            setter: setPenjelasanProduk,
-          },
-          {
-            name: "hiburan",
-            label: "Hiburan",
-            value: hiburan,
-            setter: setHiburan,
-          },
-        ].map(({ name, label, value, setter }) => (
-          <div className="py-4 px-6" key={name}>
-            <label className="block text-base font-semibold text-gray-700 mb-2">
-              {label}
-            </label>
-            <div className="flex space-x-4 overflow-auto max-md:pb-2">
-              {options.map((option) => (
-                <label className="block cursor-pointer" key={option}>
-                  <input
-                    type="radio"
-                    name={name}
-                    value={option}
-                    checked={value === option}
-                    onChange={() => setter(option)}
-                    className="peer hidden"
-                    required
-                  />
-                  <span
-                    className={`inline-block px-6 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-all duration-200 select-none ${colorClasses[option]}`}
-                  >
-                    {option}
-                  </span>
-                </label>
-              ))}
-            </div>
+          <div className="flex flex-nowrap gap-3 overflow-x-auto pb-2">
+            {options.map((option) => (
+              <label className="cursor-pointer" key={option}>
+                <input
+                  type="radio"
+                  name={name}
+                  value={option}
+                  checked={value === option}
+                  onChange={() => setter(option)}
+                  className="peer hidden"
+                  required
+                />
+                <span
+                  className={`inline-block px-5 py-2 rounded-full border border-gray-300 bg-white text-gray-700 font-medium shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200 select-none ${colorClasses[option]}`}
+                >
+                  {option}
+                </span>
+              </label>
+            ))}
           </div>
-        ))}
-
-        {/* Submit button */}
-        <div className="p-6 flex justify-center">
-          <button
-            type="submit"
-            className="rounded-lg px-8 py-3 bg-rose-600 text-white font-semibold hover:bg-rose-700 transition"
-          >
-            Kirim
-          </button>
         </div>
-      </form>
-    </main>
+      ))}
+
+      {/* Kritik dan Saran */}
+      <div className="p-6">
+        <label
+          htmlFor="kritik_saran"
+          className="block text-lg font-semibold text-gray-700"
+        >
+          💬 Kritik & Saran
+        </label>
+        <textarea
+          id="kritik_saran"
+          value={kritikSaran}
+          onChange={(e) => setKritikSaran(e.target.value)}
+          rows={4}
+          className="mt-2 block w-full text-gray-800 rounded-md p-3 border border-gray-300 focus:ring-2 focus:ring-rose-400 focus:outline-none resize-none"
+          placeholder="Tuliskan kritik dan saran Anda di sini..."
+        />
+      </div>
+
+      {/* Submit Button */}
+      <div className="p-6 flex justify-center">
+        <button
+          type="submit"
+          className="flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-rose-600 to-pink-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition transform duration-150"
+        >
+          🚀 Kirim Kuesioner
+        </button>
+      </div>
+    </form>
+  </main>
   );
 };
 

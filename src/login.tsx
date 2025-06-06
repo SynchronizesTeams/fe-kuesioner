@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaUser } from 'react-icons/fa';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+console.log(API_BASE_URL);
 
 interface LoginResponse {
   success: boolean;
@@ -17,8 +22,6 @@ interface LoginResult {
   message?: string;
 }
 
-const API_BASE_URL = 'https://be-kuesioner.synchronizeteams.my.id';
-
 const LoginPage: React.FC = () => {
   const [nis, setNis] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +32,6 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('userToken');
     if (token) {
-      // User sudah login, redirect langsung ke /kuesioner
       navigate('/kuesioner');
     }
   }, [navigate]);
@@ -46,7 +48,6 @@ const LoginPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        // Ambil error message dari response JSON bila ada
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
@@ -73,76 +74,79 @@ const LoginPage: React.FC = () => {
     setError('');
 
     if (!nis.trim()) {
-      setError('NIS is required');
+      setError('NIS wajib diisi');
       return;
     }
 
     setIsLoading(true);
-
     const result = await handleLogin(nis.trim());
-
     setIsLoading(false);
 
     if (result.success) {
-      // Navigate ke /kuesioner setelah login berhasil
       navigate('/kuesioner');
     } else {
-      setError(result.message || 'Login failed. Please check your NIS and try again.');
+      setError(result.message || 'Login gagal. Silakan periksa NIS Anda.');
     }
   };
 
   return (
-    <div className="min-h-screen min-w-screen bg-gradient-to-br from-slate-50 to-gray-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="bg-gradient-to-r from-red-500 to-rose-700 p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">Login Pekan IT</h1>
-          <h2 className="text-lg sm:text-xl font-semibold text-white text-center mt-1">SMK Plus Pelita Nusantara</h2>
+    <div className="min-h-screen min-w-screen flex items-center justify-center px-4 sm:px-6 bg-gradient-to-br from-rose-50 to-rose-100">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-red-500 to-rose-700 p-6 sm:p-8 text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow">
+            Login Pekan IT
+          </h1>
+          <h2 className="text-base sm:text-lg text-white mt-1">
+            SMK Plus Pelita Nusantara
+          </h2>
         </div>
 
-        <form className="p-6 space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="nis" className="block text-lg font-semibold text-gray-700 mb-1">
-              NIS
+        <form className="p-6 space-y-5" onSubmit={handleSubmit}>
+          <div className="relative">
+            <label htmlFor="nis" className="block text-base font-medium text-gray-700 mb-1">
+              Nomor Induk Siswa (NIS)
             </label>
-            <input
-              type="text"
-              id="nis"
-              name="nis"
-              value={nis}
-              onChange={(e) => setNis(e.target.value)}
-              disabled={isLoading}
-              className={`w-full text-lg text-black rounded-md shadow-sm p-3 outline-none transition-all duration-100 border ${
-                error ? 'border-red-300 focus:ring-red-400' : 'border-gray-300 focus:ring-red-400'
-              } ${isLoading ? 'bg-gray-100 cursor-not-allowed' : 'focus:ring-2'}`}
-              placeholder="Enter your NIS"
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleSubmit(e as any);
-                }
-              }}
-            />
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <FaUser className="text-lg" />
+              </span>
+              <input
+                type="text"
+                id="nis"
+                name="nis"
+                value={nis}
+                onChange={(e) => setNis(e.target.value)}
+                disabled={isLoading}
+                className={`w-full pl-10 pr-4 py-3 text-base text-black rounded-lg shadow-sm outline-none transition-all duration-200 border ${
+                  error ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-rose-500'
+                } ${isLoading ? 'bg-gray-100 cursor-not-allowed' : 'focus:ring-2'}`}
+                placeholder="Contoh: 20220045"
+              />
+            </div>
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm font-medium bg-red-50 p-3 rounded-md border border-red-200">{error}</div>
+            <div className="text-red-600 text-sm font-medium bg-red-50 p-3 rounded-md border border-red-200 shadow-sm">
+              {error}
+            </div>
           )}
 
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full text-white text-lg font-semibold py-3 px-4 rounded-md transition-all duration-200 ${
+            className={`w-full flex items-center justify-center text-white text-base font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out ${
               isLoading
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-red-500 to-rose-700 hover:from-red-600 hover:to-rose-800'
+                : 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-md hover:shadow-lg'
             }`}
           >
             {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
-                Logging in...
-              </div>
+              <>
+                <AiOutlineLoading3Quarters className="animate-spin h-5 w-5 mr-2" />
+                Sedang masuk...
+              </>
             ) : (
-              'Login'
+              'Masuk'
             )}
           </button>
         </form>

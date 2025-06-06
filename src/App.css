@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@layer utilities {
+  .animate-loading-bar {
+    animation: loadingBar 2s infinite linear;
+  }
+
+  @keyframes loadingBar {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
