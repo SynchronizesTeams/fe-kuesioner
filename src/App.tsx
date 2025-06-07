@@ -4,6 +4,7 @@ import Kuesioner from "./kuesioner";
 import Antrian from "./antrian";
 import LoginPage from "./login";
 import KuesionerTamu from "./kuesioner-tamu";
+import AntrianPerKelas from "./guru";
 
 const App: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const App: React.FC = () => {
         <Route path="/antrian" element={<Antrian />} />
         <Route path="/kuesioner" element={<Kuesioner />} />
         <Route path="/kuesioner-tamu" element={<KuesionerTamu />} />
+        <Route path="/guru" element={<AntrianPerKelas />} />
       </Routes>
     </BrowserRouter>
   );
