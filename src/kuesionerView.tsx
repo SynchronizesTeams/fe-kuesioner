@@ -28,7 +28,7 @@ type TamuKuesioner = {
   created_at: string;
 };
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 const KuesionerPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<"siswa" | "tamu">("siswa");
@@ -70,7 +70,28 @@ const KuesionerPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [selectedType]);
 
-  const handleDownload = () => {
+  const handleDownloadTamu = () => {
+    const downloadUrl = `${API_BASE_URL}/api/export-kuesioner-tamu`;
+
+    fetch(downloadUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal download file");
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "kuesioner-tamu-pekanIt.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((err) => alert(err.message));
+  };
+
+  const handleDownloadSiswa = () => {
     const downloadUrl = `${API_BASE_URL}/api/export-kuesioner`;
 
     fetch(downloadUrl)
@@ -82,7 +103,7 @@ const KuesionerPage: React.FC = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "kuesioner.xlsx";
+        a.download = "kuesioner-siswa-pekanIt.xlsx";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -191,13 +212,22 @@ const KuesionerPage: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handleDownload}
-                className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-2 rounded-lg hover:from-emerald-600 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-200 font-semibold"
-              >
-                <FaDownload className="text-sm" />
-                Download Excel
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleDownloadTamu}
+                  className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-2 rounded-lg hover:from-emerald-600 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-200 font-semibold"
+                >
+                  <FaDownload className="text-sm" />
+                  Download Excel Tamu
+                </button>
+                <button
+                  onClick={handleDownloadSiswa}
+                  className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-2 rounded-lg hover:from-emerald-600 hover:to-green-700 shadow-md hover:shadow-lg transition-all duration-200 font-semibold"
+                >
+                  <FaDownload className="text-sm" />
+                  Download Excel Siswa
+                </button>
+              </div>
             </div>
           </div>
         </div>
