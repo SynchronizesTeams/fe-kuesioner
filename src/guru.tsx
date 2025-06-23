@@ -15,7 +15,7 @@ const AntrianPerKelas: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const kelasList = [
-                'X-RPL-1', 'X-RPL-2', 'XI-RPL-1', 'XI-RPL-2', 'XI-RPL-3',  'XII-RPL-1', 'XII-RPL-2', 'XII-RPL-3', 'X-TJKT-1', 'X-TJKT-2', 'X-TJKT-3', 'XI-TKJ-1', 'XI-TKJ-2', 'XII-TKJ-1', 'XII-TKJ-2','X-DKV-1', 'X-DKV-2', 'X-DKV-3', 'X-DKV-4', 'XI-MM-1', 'XI-MM-2', 'XI-MM-3', 'XI-MM-4', 'XI-I-MM-1', 'XII-MM-2', 'XII-MM-3', 'XII-MM-4', 'X-LPB-1', 'X-LPB-2', 'XI-PKM-1', 'XI-PKM-2', 'XII-PKM-1', 'XII-PKM-2'
+                'X-RPL-1', 'X-RPL-2', 'XI-RPL-1', 'XI-RPL-2', 'XI-RPL-3', 'X-TJKT-1', 'X-TJKT-2', 'X-TJKT-3', 'XI-TKJ-1', 'XI-TKJ-2', 'X-DKV-1', 'X-DKV-2', 'X-DKV-3', 'X-DKV-4', 'XI-MM-1', 'XI-MM-2', 'XI-MM-3', 'XI-MM-4', 'X-LPB-1', 'X-LPB-2', 'XI-PKM-1', 'XI-PKM-2',
             ];
 
   const handleFetchAntrian = async () => {
