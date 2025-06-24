@@ -71,21 +71,70 @@ const PekanItKuesioner: React.FC = () => {
         throw new Error("Gagal mengirim data");
       }
 
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('User ID tidak ditemukan.');
+      }
+
+      const generateResponse = await fetch(`${API_BASE_URL}/api/antrian`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      if (!generateResponse.ok) {
+        const errorData = await generateResponse.json();
+        throw new Error(errorData.message || 'Gagal membuat antrian');
+      }
+
+      const getResponse = await fetch(`${API_BASE_URL}/api/antrian/show/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+
+      if (!getResponse.ok) {
+        const errorData = await getResponse.json();
+        throw new Error(errorData.message || 'Gagal mendapatkan antrian');
+      }
+
+      const responseData = await getResponse.json();
+
+      let nomor = '';
+      if ('no_antrian' in responseData) {
+        nomor = responseData.no_antrian;
+      } else if (responseData.data?.no_antrian) {
+        nomor = responseData.data.no_antrian;
+      } else if ('queue_number' in responseData) {
+        nomor = responseData.queue_number;
+      } else {
+        console.error('Unexpected API response format:', responseData);
+        throw new Error('Format response tidak dikenali');
+      }
+
+      localStorage.setItem('nomorAntrian', nomor);
+
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
-        text: 'Terima kasih telah mengisi kuesioner! Anda akan dialihkan untuk mendapat nomor antrian.',
+        text: `Terima kasih telah mengisi kuesioner! Nomor antrian Anda: ${nomor}. Anda akan dialihkan ke halaman antrian.`,
         showConfirmButton: false,
-        timer: 2000
+        timer: 3000
       }).then(() => {
         navigate("/antrian");
       });
     } catch (error) {
       console.error("Error:", error);
+      console.error("Error:", error);
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: 'Terjadi kesalahan saat mengirim data.',
+        text: (error as Error).message || 'Terjadi kesalahan saat mengirim data atau mendapatkan antrian.',
       }).then(() => {
         navigate("/antrian");
       });
