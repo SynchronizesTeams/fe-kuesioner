@@ -39,7 +39,8 @@ const AntrianPerKelas: React.FC = () => {
       }
 
       const result = await response.json();
-      setAntrianList(result.data || []);
+      const sortedAntrian = (result.data || []).sort((a: AntrianData, b: AntrianData) => a.no_antrian - b.no_antrian);
+      setAntrianList(sortedAntrian);
     } catch (error) {
       console.error(error);
       Swal.fire('Error', (error as Error).message, 'error');
