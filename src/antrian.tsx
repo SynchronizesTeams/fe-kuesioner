@@ -78,6 +78,11 @@ const NomorAntrian: React.FC = () => {
     }
   }, [navigate, userToken, userId]);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-white via-rose-50 to-rose-100 px-4 py-12">
@@ -90,7 +95,13 @@ const NomorAntrian: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-white via-rose-50 to-rose-100 px-4 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-white via-rose-50 to-rose-100 px-4 py-12 relative">
+      <button
+        onClick={handleLogout}
+        className="absolute top-4 right-4 py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition duration-300 ease-in-out shadow-md"
+      >
+        Logout
+      </button>
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
         <div className="bg-gradient-to-r from-rose-500 to-red-600 py-8 px-6 text-center">
           <h1 className="text-3xl font-bold text-white drop-shadow">Nomor Antrian</h1>
@@ -104,8 +115,6 @@ const NomorAntrian: React.FC = () => {
               {nomorAntrian}
             </span>
           </div>
-
-
         </div>
       </div>
     </div>
