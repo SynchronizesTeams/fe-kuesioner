@@ -118,6 +118,7 @@ const PekanItKuesioner: React.FC = () => {
       }
 
       localStorage.setItem('nomorAntrian', nomor);
+      localStorage.setItem('is_ngisi', 'true');
 
       Swal.fire({
         icon: 'success',

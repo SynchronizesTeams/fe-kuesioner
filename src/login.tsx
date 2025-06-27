@@ -31,8 +31,13 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('userToken');
+    const isNgisi = localStorage.getItem('is_ngisi');
     if (token) {
-      navigate('/kuesioner');
+      if (isNgisi === 'true') {
+        navigate('/antrian');
+      } else {
+        navigate('/kuesioner');
+      }
     }
   }, [navigate]);
 
@@ -59,6 +64,7 @@ const LoginPage: React.FC = () => {
         localStorage.setItem('userId', data.data.user_id);
         localStorage.setItem('userName', data.data.name);
         localStorage.setItem('userClass', data.data.kelas);
+        localStorage.setItem('is_ngisi', 'false');
         return { success: true };
       } else {
         return { success: false, message: data.message || 'Login failed' };
